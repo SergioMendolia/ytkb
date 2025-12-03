@@ -3,6 +3,8 @@ name: Build
 on:
   push:
     branches: [ main, master ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
@@ -16,15 +18,15 @@ jobs:
           - os: ubuntu-latest
             goos: linux
             goarch: amd64
-            artifact_name: youtrack_writer-linux-amd64
+            artifact_name: ytkb-linux-amd64
           - os: windows-latest
             goos: windows
             goarch: amd64
-            artifact_name: youtrack_writer-windows-amd64.exe
+            artifact_name: ytkb-windows-amd64.exe
           - os: macos-latest
             goos: darwin
             goarch: amd64
-            artifact_name: youtrack_writer-darwin-amd64
+            artifact_name: ytkb-darwin-amd64
     
     steps:
     - name: Checkout code
@@ -60,4 +62,39 @@ jobs:
         name: ${{ matrix.artifact_name }}
         path: ${{ matrix.artifact_name }}
         retention-days: 7
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
+        
+    - name: Prepare release files
+      run: |
+        find ./artifacts -name "ytkb-*" -type f -exec cp {} . \;
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ytkb-linux-amd64
+          ytkb-windows-amd64.exe
+          ytkb-darwin-amd64
+        generate_notes: true
+        draft: false
+        prerelease: ${{ contains(github.ref, '-') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
