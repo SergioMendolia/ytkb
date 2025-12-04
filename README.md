@@ -9,12 +9,18 @@ A CLI application for syncing YouTrack knowledge base articles to local markdown
 - **Push**: Push changes back to YouTrack (update only, no creation)
 - **Safety**: Page deletion must be done manually in YouTrack - the app will warn you with links
 
+## Roadmap
+
+ - [ ] Manage images and attachments
+ - [ ] Allow page creation from new md files
+
+
 ## Installation
 
-Build the project:
+Build the project (or download the latest release binary):
 
 ```bash
-go build -o youtrack_writer
+go build -o ytkb
 ```
 
 Or install:
@@ -27,7 +33,9 @@ go install
 
 ### Global Configuration
 
-Create a configuration file at `~/.config/youtrack_writer/config.ini` or let the app guide you on first run
+When running for the first time, ytkb will guide you in creating a configuration file at `~/.config/youtrack_writer/config.ini`. 
+
+You can also create it manually:
 
 ```ini
 [config]
@@ -35,17 +43,13 @@ token=your_api_token_here
 url=https://your-youtrack-instance.com
 ```
 
-If the file doesn't exist, the app will prompt you to create it interactively.
-
 ### Project Configuration
 
-Create a `.env` file in your working directory:
+On the first run, the app will ask you to chose a knowledge base and create a .env file with it in the execution folder
 
 ```
 KB_KEY=your_knowledge_base_key
 ```
-
-If the `.env` file doesn't exist, the app will prompt you to select a knowledge base.
 
 ## Usage
 
@@ -54,7 +58,7 @@ If the `.env` file doesn't exist, the app will prompt you to select a knowledge 
 Download all articles from the knowledge base:
 
 ```bash
-youtrack_writer download
+ytkb download
 ```
 
 This creates a nested directory structure matching the YouTrack hierarchy, with each article saved as a markdown file with YAML frontmatter.
@@ -64,7 +68,7 @@ This creates a nested directory structure matching the YouTrack hierarchy, with 
 Compare local files with the server:
 
 ```bash
-youtrack_writer diff
+ytkb diff
 ```
 
 ### Push
@@ -73,10 +77,10 @@ Push changes to YouTrack:
 
 ```bash
 # Push a specific page
-youtrack_writer push path/to/article.md
+ytkb push path/to/article.md
 
 # Push all changes
-youtrack_writer push
+ytkb push
 ```
 
 **Note**: The app will not delete pages. If a page is deleted locally, you'll see a warning with a link to delete it manually in YouTrack.
@@ -89,7 +93,6 @@ Each markdown file includes YAML frontmatter:
 ---
 id: article-id
 title: Article Title
-order: 0
 url: https://youtrack-instance.com/article-url
 ---
 ```
